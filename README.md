@@ -88,7 +88,7 @@ Then till the dataset fully loads into RAM, you may need to clear cache at certa
 sudo sh -c "/bin/echo 1 > /proc/sys/vm/drop_caches"
 ```
 
-We used [train.py](https://github.com/MohitLamba94/Restoring-Extremely-Dark-Images-In-Real-Time/tree/main/train_test_ours) to do training and testing. Please refer the detailed comments in this file for more information.
+We provide dummy [train.py](https://github.com/MohitLamba94/Restoring-Extremely-Dark-Images-In-Real-Time/tree/main/train_test_ours) to give an overview of training and testing. Please refer the detailed comments in this file for more information.
  
 
 ## Cite Us
