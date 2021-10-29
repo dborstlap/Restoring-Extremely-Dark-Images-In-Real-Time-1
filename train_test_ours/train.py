@@ -5,7 +5,7 @@ and by design larger kernels will be slower. Thus we additionally discourage use
 'Learning Raw Image Denoising with Bayer Pattern Unification and Bayer Preserving Augmentation' suggests special data 
 augmentations for Bayer pattern. We could not incorporate them so far but encourage the readers to try out data augmentations 
 mentioned in this paper and see if it helps. 
-Also for more elaborate training we recommend using usind different learning rate for conv. weights and bias 
+Also for more elaborate training and better performance use different learning rate for conv. weights and bias 
 (https://github.com/cydonia999/Learning_to_See_in_the_Dark_PyTorch/blob/470a6a8e9c6367d8fa88ee6d1dea211dd9fb1f81/demo.py#L146).
 Finally depending on amount of CPU RAM you have, choose the number of images to be loaded.
 '''
