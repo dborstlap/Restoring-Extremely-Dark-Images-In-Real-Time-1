@@ -74,7 +74,7 @@ Time taken by SID model on CPU for 8MP image : 9.998942331314088 seconds
 
 ### Training and Testing
 
-The network was trained for 1 Million iterations on RAW images. As RAW images are bulky, reading them from storage is an expensive step. We thus loaded the entire decoded dataset into CPU RAM for 8-10x faster training. We thus recommend doing the same at cost of high CPU RAM utilisation (app. 60 GB).
+We trained the network for 1 Million iterations on RAW images. As RAW images are bulky, reading them from storage is an expensive step. We therefore recommend loading the dataset into CPU RAM for 8-10x faster training.
 
 If loading dataset into RAM first clear your swap,
 
@@ -82,13 +82,13 @@ If loading dataset into RAM first clear your swap,
 swapoff -a && swapon -a
 ```
 
-Then till the dataset fully loads into RAM, you may need to clear cache at certain intervals using,
+Then till the dataset loads into RAM, you may need to clear cache at regular intervals using,
 
 ```
 sudo sh -c "/bin/echo 1 > /proc/sys/vm/drop_caches"
 ```
 
-We provide dummy [train.py](https://github.com/MohitLamba94/Restoring-Extremely-Dark-Images-In-Real-Time/tree/main/train_test_ours) to give an overview of training and testing. Please refer the detailed comments in this file for more information.
+We provide a dummy [train.py](https://github.com/MohitLamba94/Restoring-Extremely-Dark-Images-In-Real-Time/tree/main/train_test_ours) to give an overview of training and testing procedure and provide detailed comments to modify the code to your requiremnts.
  
 
 ## Cite Us
