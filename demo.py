@@ -5,7 +5,8 @@ import torch
 from torch.utils.data import DataLoader
 import glob
 from common_classes import load_data, run_test
-from network import Net
+from network import Net, RDB, ResBlock
+
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
