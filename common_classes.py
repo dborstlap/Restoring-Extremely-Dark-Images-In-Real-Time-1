@@ -86,7 +86,7 @@ def scale_array(x, min, max, range=1):
 
 def descale_array(color, min, max, range=1):
     # color = (bayer-min)/(max-min)*range
-    bayer = color/range*(max-min)+min
+    bayer = color/range*(max-min)
     return bayer
 
 
@@ -267,9 +267,6 @@ def part_init(train_files):
 
         # b = change_brightness(b, 50) # change the blue brightness
 
-        
-
-
         #---------------------------------------------
         # SHOW RESULT
         #---------------------------------------------
@@ -285,21 +282,16 @@ def part_init(train_files):
         #---------------------------------------------
 
         bayer_changes = rgbchanges2bayer(rgb_original, rgb, img, params)
+        print(bayer_changes)
+
         r_bayer_changes, g_bayer_changes, b_bayer_changes = bayer_changes
         red_index, green1_index, blue_index, green2_index = color_indexes
 
-        print(img.shape)
-        print('aaaaaaaaaaaaaaaaaaaaaaa')
         img = add_bayer(img, red_index, r_bayer_changes)
-        print(img.shape)
-
-        print(r_bayer_changes[0])
-        print(img[0])
+        
         img = add_bayer(img, green1_index, g_bayer_changes)
         img = add_bayer(img, blue_index, b_bayer_changes)
         img = add_bayer(img, green2_index, g_bayer_changes)
-
-
 
         raw.close()
         
