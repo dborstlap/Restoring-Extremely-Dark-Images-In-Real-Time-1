@@ -37,29 +37,6 @@ def get_na(bins,weights,img_loww,amp=1.0):
     return na1
 
 
-params = rawpy.Params(  demosaic_algorithm=None, #rawpy.DemosaicAlgorithm(1),
-                        half_size      =False, 
-                        four_color_rgb =False, 
-                        dcb_iterations =0, 
-                        dcb_enhance    =False, 
-                        noise_thr       =None, 
-                        median_filter_passes=0, 
-                        use_camera_wb   =True, 
-                        use_auto_wb     =False, 
-                        user_wb         =None, 
-                        output_bps      =8, 
-                        user_flip       =None, 
-                        user_black      =None, 
-                        user_sat        =None, 
-                        no_auto_bright  =False, 
-                        auto_bright_thr =None, 
-                        adjust_maximum_thr=0.75, 
-                        exp_shift        =None, 
-                        exp_preserve_highlights=0.0, 
-                        no_auto_scale=False, gamma=None, 
-                        chromatic_aberration=None, 
-                        bad_pixels_path=None)
-
 
 def color_pixels(raw_color_index):
     red     = np.array(raw_color_index==0)
@@ -119,11 +96,13 @@ def set_parameters(raw, img):
     wb_r, wb_g, wb_b = 1.5, 0.8, 1
     wb = [wb_r, wb_g, wb_b] # white balance of different colors
 
-    r_min, r_max = 510, 540
-    g_min, g_max = 510, 540
-    b_min, b_max = 510, 540
+    r_min, r_max = 512, 540
+    g_min, g_max = 512, 540
+    b_min, b_max = 512, 540
     cmin = [r_min, g_min, b_min] # minimimum (=dark) pixel value in bayer image 
-    cmax = [r_max, g_max, b_max] # maximum (=saturated) pixel value in bayer image 
+    cmax = [r_max, g_max, b_max] # maximum (=saturated) pixel value in bayer image
+
+    # img_loww = (np.maximum(img - 512,0)/(16383 - 512))
     
     return wb, cmin, cmax
 
@@ -188,7 +167,12 @@ def part_init(train_files):
         #----------------------------
         raw = rawpy.imread(train_files[i])
         img = raw.raw_image_visible.astype(np.float32).copy()
-        # rgb = raw.postprocess(params=params) # use this to get the exact rgb values (and accurate image), but it can't be reconverted to bayer
+        
+        ### this works, but brakes the rest of the code. Only use as reference!!!
+        # raw_parameters = rawpy.Params(use_camera_wb=True)
+        # rgb_postprocess = raw.postprocess(params=raw_parameters) # use this to get the exact rgb values (and accurate image), but it can't be reconverted to bayer
+        # plt.imshow(rgb_postprocess)
+        # plt.show()
 
         # info2 = raw.sizes
         # print(info2)
@@ -211,6 +195,7 @@ def part_init(train_files):
         # info11 = raw.color_matrix
         # print(info11)
 
+        
         #------------------------------
         # CONVERT BAYER INTO R, G and B
         #------------------------------
@@ -255,13 +240,15 @@ def part_init(train_files):
         # rgb = rgb.astype(int)
 
         rgb_original = cv2.merge([r, g, b])
+        rgb_original = apply_bounds(rgb_original)
+
         #---------------------------------------------
         # DO OPERATIONS ON R, G and B color spectrums
         #---------------------------------------------
 
         # change_brightness, add_noise,...
            
-        # r = add_noise(r, 100)
+        r = add_noise(r, 30)
 
         # r = change_brightness(r, 50) # change the red brightness
 
@@ -271,24 +258,21 @@ def part_init(train_files):
         # SHOW RESULT
         #---------------------------------------------
         rgb = cv2.merge([r, g, b])
-        rgb = apply_bounds(rgb) # to prevent changed numbers being smaller than 0 or larger than 255
+        rgb = apply_bounds(rgb) # to prevent changed numbers being smaller than 0 or larger than 255  
 
         plt.imshow(rgb)
-        plt.show()
-        
+        plt.show()      
 
         #---------------------------------------------
         # APPLY CHANGES TO BAYER, CONVERT RGB TO BAYER
         #---------------------------------------------
 
         bayer_changes = rgbchanges2bayer(rgb_original, rgb, img, params)
-        print(bayer_changes)
 
         r_bayer_changes, g_bayer_changes, b_bayer_changes = bayer_changes
         red_index, green1_index, blue_index, green2_index = color_indexes
 
         img = add_bayer(img, red_index, r_bayer_changes)
-        
         img = add_bayer(img, green1_index, g_bayer_changes)
         img = add_bayer(img, blue_index, b_bayer_changes)
         img = add_bayer(img, green2_index, g_bayer_changes)
@@ -304,7 +288,7 @@ def part_init(train_files):
         if w%32!=0:
             print('Image dimensions should be multiple of 32. Correcting the 2nd dimension.')
             w = (w//32)*32
-            img = img[:,:w]        
+            img = img[:,:w]
         
         img_loww = (np.maximum(img - 512,0)/ (16383 - 512))       
 
