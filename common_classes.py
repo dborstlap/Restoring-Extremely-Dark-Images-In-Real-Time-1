@@ -93,12 +93,12 @@ def set_parameters(raw, img):
     white_balance = np.array(raw.camera_whitebalance)
     wb_r, wb_g1, wb_b, wb_g2 = white_balance/max(white_balance)
     wb_g = (wb_g1 + wb_g2)/2
-    wb_r, wb_g, wb_b = 1.5, 0.8, 1
+    wb_r, wb_g, wb_b = 1, 1, 1                # 1.5, 0.8, 1
     wb = [wb_r, wb_g, wb_b] # white balance of different colors
 
-    r_min, r_max = 512, 540
-    g_min, g_max = 512, 540
-    b_min, b_max = 512, 540
+    r_min, r_max = 512, 523.3
+    g_min, g_max = 512, 535
+    b_min, b_max = 512, 520.3
     cmin = [r_min, g_min, b_min] # minimimum (=dark) pixel value in bayer image 
     cmax = [r_max, g_max, b_max] # maximum (=saturated) pixel value in bayer image
 
@@ -242,13 +242,34 @@ def part_init(train_files):
         rgb_original = cv2.merge([r, g, b])
         rgb_original = apply_bounds(rgb_original)
 
+        raw_parameters = rawpy.Params(use_camera_wb=True)
+        rgb_postprocess = raw.postprocess(params=raw_parameters) # use this to get the exact rgb values
+
+        r22 = rgb_postprocess[:,:,0]
+        g22 = rgb_postprocess[:,:,1]
+        b22 = rgb_postprocess[:,:,2]
+
+        print(np.average(r), np.average(r22))
+        print(np.average(g), np.average(g22))
+        print(np.average(b), np.average(b22))
+
+        # print('postproces ', rgb_postprocess)
+        # print('converted ', rgb_original)
+
+        f = plt.figure()
+        f.add_subplot(1,2,1)
+        plt.imshow(rgb_postprocess)
+        f.add_subplot(1,2, 2)
+        plt.imshow(rgb_original)
+        plt.show()
+
         #---------------------------------------------
         # DO OPERATIONS ON R, G and B color spectrums
         #---------------------------------------------
 
         # change_brightness, add_noise,...
            
-        r = add_noise(r, 30)
+        # r = add_noise(r, 30)
 
         # r = change_brightness(r, 50) # change the red brightness
 
