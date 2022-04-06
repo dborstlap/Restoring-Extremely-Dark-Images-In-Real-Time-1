@@ -61,10 +61,10 @@ def scale_array(x, min, max, range=1):
     scaled = (x-min)/(max-min)*range
     return scaled
 
-def descale_array(color, min, max, range=1):
+def descale_array(scaled, min, max, range=1):
     # color = (bayer-min)/(max-min)*range
-    bayer = color/range*(max-min)
-    return bayer
+    x = scaled*(max-min)/range #+min
+    return x
 
 
 def bayer2rgb(x, min, max, range, wb):
@@ -76,6 +76,11 @@ def bayer2rgb_array(x, min, max, range, wb):
     scaled_color = scale_array(x, min, max, range)
     true_color = scaled_color*wb
     return true_color.astype(int)
+
+def rgb2bayer_array(true_color, min, max, range, wb):
+    scaled_color = true_color/wb
+    x = descale_array(scaled_color, min, max, range)
+    return x
 
 
 # defines a bunch of parameters which (can) help with the conversion from bayer to rgb. Can still be improved.
@@ -118,22 +123,15 @@ def change_brightness(color, amount):
     return color
 
 
-
-def rgb2bayer_array(color, min, max, range, wb):
-    scaled_color = color/wb
-    color_bayer = descale_array(scaled_color, min, max, range=1)
-    return color_bayer
-
 def add_bayer(bayer, color_index, amount):
     amount = amount.flatten()
     bayer[color_index] = bayer[color_index]+amount
     return bayer
 
-def rgbchanges2bayer(rgb_original, rgb, img, params):
-    rgb_changes = np.subtract(rgb, rgb_original)
-    r_changes = rgb_changes[:,:,0]
-    g_changes = rgb_changes[:,:,1]
-    b_changes = rgb_changes[:,:,2]
+def rgbchanges2bayer(rgb_change, img, params):
+    r_changes = rgb_change[:,:,0]
+    g_changes = rgb_change[:,:,1]
+    b_changes = rgb_change[:,:,2]
 
     wb, cmin, cmax = params
     wb_r, wb_g, wb_b = wb
@@ -271,7 +269,7 @@ def part_init(train_files):
            
         # r = add_noise(r, 30)
 
-        # r = change_brightness(r, 50) # change the red brightness
+        r = change_brightness(r, 1) # change the red brightness
 
         # b = change_brightness(b, 50) # change the blue brightness
 
@@ -281,14 +279,15 @@ def part_init(train_files):
         rgb = cv2.merge([r, g, b])
         rgb = apply_bounds(rgb) # to prevent changed numbers being smaller than 0 or larger than 255  
 
-        plt.imshow(rgb)
-        plt.show()      
+        # plt.imshow(rgb)
+        # plt.show()      
 
         #---------------------------------------------
         # APPLY CHANGES TO BAYER, CONVERT RGB TO BAYER
         #---------------------------------------------
 
-        bayer_changes = rgbchanges2bayer(rgb_original, rgb, img, params)
+        rgb_change = rgb - rgb_original
+        bayer_changes = rgbchanges2bayer(rgb_change, img, params)
 
         r_bayer_changes, g_bayer_changes, b_bayer_changes = bayer_changes
         red_index, green1_index, blue_index, green2_index = color_indexes
